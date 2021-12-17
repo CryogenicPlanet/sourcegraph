@@ -3,7 +3,7 @@ import * as React from 'react'
 
 import { TelemetryProps } from '@sourcegraph/shared/src/telemetry/telemetryService'
 
-import { HomePanelsProps, PatternTypeProps } from '..'
+import { HomePanelsProps } from '..'
 import { AuthenticatedUser } from '../../auth'
 import { VulnerabilityAnnouncement } from '../home/VulnerabilityAnnouncement'
 
@@ -14,7 +14,7 @@ import { RecentSearchesPanel } from './RecentSearchesPanel'
 import { RepositoriesPanel } from './RepositoriesPanel'
 import { SavedSearchesPanel } from './SavedSearchesPanel'
 
-interface Props extends Pick<PatternTypeProps, 'patternType'>, TelemetryProps, HomePanelsProps {
+interface Props extends TelemetryProps, HomePanelsProps {
     authenticatedUser: AuthenticatedUser | null
     isSourcegraphDotCom: boolean
 }

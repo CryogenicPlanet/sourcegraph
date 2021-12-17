@@ -50,7 +50,6 @@ import { PageRoutes, EnterprisePageRoutes } from './routes.constants'
 import { Settings } from './schema/settings.schema'
 import {
     parseSearchURLQuery,
-    PatternTypeProps,
     HomePanelsProps,
     SearchStreamingProps,
     ParsedSearchQueryProps,
@@ -78,7 +77,6 @@ export interface LayoutProps
         TelemetryProps,
         ActivationProps,
         ParsedSearchQueryProps,
-        PatternTypeProps,
         SearchContextProps,
         HomePanelsProps,
         SearchStreamingProps,
@@ -138,17 +136,15 @@ export const Layout: React.FunctionComponent<LayoutProps> = props => {
     const {
         history,
         parsedSearchQuery: currentQuery,
-        patternType: currentPatternType,
         selectedSearchContextSpec,
         location,
         setParsedSearchQuery,
-        setPatternType,
         setSelectedSearchContextSpec,
     } = props
 
     useEffect(() => setQueryStateFromURL(location.search), [location.search])
 
-    const { query = '', patternType } = useMemo(() => parseSearchURL(location.search), [location.search])
+    const { query = '' } = useMemo(() => parseSearchURL(location.search), [location.search])
 
     const searchContextSpec = useMemo(() => getGlobalSearchContextFilter(query)?.spec, [query])
 
@@ -159,23 +155,16 @@ export const Layout: React.FunctionComponent<LayoutProps> = props => {
 
         // Only override filters from URL if there is a search query
         if (query) {
-            if (patternType && patternType !== currentPatternType) {
-                setPatternType(patternType)
-            }
-
             if (searchContextSpec && searchContextSpec !== selectedSearchContextSpec) {
                 setSelectedSearchContextSpec(searchContextSpec)
             }
         }
     }, [
         history,
-        currentPatternType,
         currentQuery,
         selectedSearchContextSpec,
-        patternType,
         query,
         setParsedSearchQuery,
-        setPatternType,
         setSelectedSearchContextSpec,
         searchContextSpec,
     ])

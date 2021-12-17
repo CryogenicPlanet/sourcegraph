@@ -19,7 +19,6 @@ import {
     Controller as ExtensionsController,
     createController as createExtensionsController,
 } from '@sourcegraph/shared/src/extensions/controller'
-import { SearchPatternType } from '@sourcegraph/shared/src/graphql-operations'
 import { GraphQLClient } from '@sourcegraph/shared/src/graphql/graphql'
 import { getModeFromPath } from '@sourcegraph/shared/src/languages'
 import { Notifications } from '@sourcegraph/shared/src/notifications/Notifications'
@@ -99,7 +98,7 @@ import { UserSettingsSidebarItems } from './user/settings/UserSettingsSidebar'
 import { UserSessionStores } from './UserSessionStores'
 import { globbingEnabledFromSettings } from './util/globbing'
 import { observeLocation } from './util/location'
-import { siteSubjectNoAdmin, viewerSubjectFromSettings, defaultPatternTypeFromSettings } from './util/settings'
+import { siteSubjectNoAdmin, viewerSubjectFromSettings } from './util/settings'
 
 export interface SourcegraphWebAppProps
     extends CodeIntelligenceProps,
@@ -151,11 +150,6 @@ interface SourcegraphWebAppState extends SettingsCascadeProps {
      * (eg. pattern type, case sensitivity) removed
      */
     parsedSearchQuery: string
-
-    /**
-     * The current search pattern type.
-     */
-    searchPatternType: SearchPatternType
 
     selectedSearchContextSpec?: string
     defaultSearchContextSpec: string
@@ -220,18 +214,12 @@ export class SourcegraphWebApp extends React.Component<SourcegraphWebAppProps, S
             })
         )
 
-        const parsedSearchURL = parseSearchURL(window.location.search)
-        // The patternType in the URL query parameter. If none is provided, default to literal.
-        // This will be updated with the default in settings when the web app mounts.
-        const urlPatternType = parsedSearchURL.patternType || SearchPatternType.literal
-
         setQueryStateFromURL(window.location.search)
 
         this.state = {
             settingsCascade: EMPTY_SETTINGS_CASCADE,
             viewerSubject: siteSubjectNoAdmin(),
-            parsedSearchQuery: parsedSearchURL.query || '',
-            searchPatternType: urlPatternType,
+            parsedSearchQuery: parseSearchURL(window.location.search).query || '',
             defaultSearchContextSpec: 'global', // global is default for now, user will be able to change this at some point
             hasUserAddedRepositories: false,
             hasUserSyncedPublicRepositories: false,
@@ -267,13 +255,12 @@ export class SourcegraphWebApp extends React.Component<SourcegraphWebAppProps, S
                 ([settingsCascade, authenticatedUser]) => {
                     setExperimentalFeaturesFromSettings(settingsCascade)
                     setQueryStateFromSettings(settingsCascade)
-                    this.setState(state => ({
+                    this.setState({
                         settingsCascade,
                         authenticatedUser,
                         globbing: globbingEnabledFromSettings(settingsCascade),
-                        searchPatternType: defaultPatternTypeFromSettings(settingsCascade) || state.searchPatternType,
                         viewerSubject: viewerSubjectFromSettings(settingsCascade, authenticatedUser),
-                    }))
+                    })
                 },
                 () => this.setState({ authenticatedUser: null })
             )
@@ -421,8 +408,6 @@ export class SourcegraphWebApp extends React.Component<SourcegraphWebAppProps, S
                                                     fetchHighlightedFileLineRanges={fetchHighlightedFileLineRanges}
                                                     parsedSearchQuery={this.state.parsedSearchQuery}
                                                     setParsedSearchQuery={this.setParsedSearchQuery}
-                                                    patternType={this.state.searchPatternType}
-                                                    setPatternType={this.setPatternType}
                                                     // Extensions
                                                     platformContext={this.platformContext}
                                                     extensionsController={this.extensionsController}
@@ -483,12 +468,6 @@ export class SourcegraphWebApp extends React.Component<SourcegraphWebAppProps, S
 
     private setParsedSearchQuery = (query: string): void => {
         this.setState({ parsedSearchQuery: query })
-    }
-
-    private setPatternType = (patternType: SearchPatternType): void => {
-        this.setState({
-            searchPatternType: patternType,
-        })
     }
 
     private onUserExternalServicesOrRepositoriesUpdate = (

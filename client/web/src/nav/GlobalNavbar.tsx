@@ -41,7 +41,6 @@ import {
 import { LayoutRouteProps } from '../routes'
 import { Settings } from '../schema/settings.schema'
 import {
-    PatternTypeProps,
     ParsedSearchQueryProps,
     isSearchContextSpecAvailable,
     getGlobalSearchContextFilter,
@@ -67,7 +66,6 @@ interface Props
         ExtensionAlertAnimationProps,
         ActivationProps,
         Pick<ParsedSearchQueryProps, 'parsedSearchQuery'>,
-        PatternTypeProps,
         SearchContextInputProps,
         CodeInsightsProps,
         BatchChangesProps {
@@ -101,7 +99,6 @@ interface Props
 export const GlobalNavbar: React.FunctionComponent<Props> = ({
     authRequired,
     showSearchBox,
-    patternType,
     variant,
     isLightTheme,
     branding,
@@ -185,7 +182,6 @@ export const GlobalNavbar: React.FunctionComponent<Props> = ({
             location={location}
             history={history}
             isLightTheme={isLightTheme}
-            patternType={patternType}
             isSourcegraphDotCom={isSourcegraphDotCom}
             searchContextsEnabled={searchContextsEnabled}
             isRepositoryRelatedPage={isRepositoryRelatedPage}
