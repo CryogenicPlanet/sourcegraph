@@ -17,6 +17,7 @@ import (
 	"github.com/cockroachdb/errors"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/sourcegraph/sourcegraph/internal/codeintel/stores/dbstore"
 	"github.com/sourcegraph/sourcegraph/internal/conf/reposource"
 	"github.com/sourcegraph/sourcegraph/internal/extsvc/npmpackages/npm"
 	"github.com/sourcegraph/sourcegraph/internal/vcs"
@@ -49,7 +50,8 @@ func TestNoMaliciousFilesNPM(t *testing.T) {
 	createMaliciousTgz(t, tgzPath)
 
 	s := NPMPackagesSyncer{
-		Config: &schema.NPMPackagesConnection{Dependencies: []string{}},
+		Config:  &schema.NPMPackagesConnection{Dependencies: []string{}},
+		DBStore: &simpleNPMPackageDBStoreMock{},
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // cancel now  to prevent any network IO
@@ -78,6 +80,12 @@ func createMaliciousTgz(t *testing.T, tgzPath string) {
 	createTgz(t, tgzPath, fileInfos)
 }
 
+type simpleNPMPackageDBStoreMock struct{}
+
+func (store *simpleNPMPackageDBStoreMock) GetNPMDependencyRepos(ctx context.Context, filter dbstore.GetNPMDependencyReposOpts) ([]dbstore.NPMDependencyRepo, error) {
+	return []dbstore.NPMDependencyRepo{}, nil
+}
+
 func TestNPMCloneCommand(t *testing.T) {
 	dir, err := os.MkdirTemp("", "")
 	assert.Nil(t, err)
@@ -88,7 +96,8 @@ func TestNPMCloneCommand(t *testing.T) {
 
 	npm.NPMBinary = npmScript(t, dir)
 	s := NPMPackagesSyncer{
-		Config: &schema.NPMPackagesConnection{Dependencies: []string{}},
+		Config:  &schema.NPMPackagesConnection{Dependencies: []string{}},
+		DBStore: &simpleNPMPackageDBStoreMock{},
 	}
 	bareGitDirectory := path.Join(dir, "git")
 	s.runCloneCommand(t, bareGitDirectory, []string{exampleNPMVersionedPackage})

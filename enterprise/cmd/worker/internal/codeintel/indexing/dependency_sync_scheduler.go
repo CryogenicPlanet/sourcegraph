@@ -21,7 +21,8 @@ import (
 )
 
 var schemeToExternalService = map[string]string{
-	"semanticdb": extsvc.KindJVMPackages,
+	"semanticdb": extsvc.KindJVMPackages, // TODO: [Varun] deduplicate
+	"npm":        extsvc.KindNPMPackages, // TODO: [Varun] deduplicate
 }
 
 // NewDependencySyncScheduler returns a new worker instance that processes
@@ -184,14 +185,14 @@ func (h *dependencySyncSchedulerHandler) insertDependencyRepo(ctx context.Contex
 
 // shouldIndexDependencies returns true if the given upload should undergo dependency
 // indexing. Currently, we're only enabling dependency indexing for a repositories that
-// were indexed via lsif-go and lsif-java.
+// were indexed via lsif-go, lsif-java and lsif-tsc.
 func (h *dependencySyncSchedulerHandler) shouldIndexDependencies(ctx context.Context, store DBStore, uploadID int) (bool, error) {
 	upload, _, err := store.GetUploadByID(ctx, uploadID)
 	if err != nil {
 		return false, errors.Wrap(err, "dbstore.GetUploadByID")
 	}
 
-	return upload.Indexer == "lsif-go" || upload.Indexer == "lsif-java", nil
+	return upload.Indexer == "lsif-go" || upload.Indexer == "lsif-java" || upload.Indexer == "lsif-tsc", nil
 }
 
 func kindsToArray(k map[string]struct{}) (s []string) {

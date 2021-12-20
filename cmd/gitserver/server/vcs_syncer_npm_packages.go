@@ -14,8 +14,10 @@ import (
 	"github.com/cockroachdb/errors"
 	"github.com/inconshreveable/log15"
 
+	"github.com/sourcegraph/sourcegraph/internal/codeintel/stores/dbstore"
 	"github.com/sourcegraph/sourcegraph/internal/conf/reposource"
 	"github.com/sourcegraph/sourcegraph/internal/extsvc/npmpackages/npm"
+	"github.com/sourcegraph/sourcegraph/internal/repos"
 	"github.com/sourcegraph/sourcegraph/internal/vcs"
 	"github.com/sourcegraph/sourcegraph/schema"
 )
@@ -34,8 +36,8 @@ var (
 )
 
 type NPMPackagesSyncer struct {
-	Config *schema.NPMPackagesConnection
-	// TODO: [npm-package-support-database] Add a *dbstore.Store here.
+	Config  *schema.NPMPackagesConnection
+	DBStore repos.NPMPackagesRepoStore
 }
 
 var _ VCSSyncer = &NPMPackagesSyncer{}
@@ -143,7 +145,7 @@ func (s *NPMPackagesSyncer) RemoteShowCommand(ctx context.Context, remoteURL *vc
 // For example, if the URL path represents pkg@1, and our configuration has
 // [otherPkg@1, pkg@2, pkg@3], we will return [pkg@3, pkg@2].
 func (s *NPMPackagesSyncer) packageDependencies(ctx context.Context, repoUrlPath string) (matchingDependencies []reposource.NPMDependency, err error) {
-	repoPackage, err := reposource.ParseNPMPackage(repoUrlPath)
+	repoPackage, err := reposource.ParseNPMPackageFromRepoURL(repoUrlPath)
 	if err != nil {
 		return nil, err
 	}
@@ -176,14 +178,40 @@ func (s *NPMPackagesSyncer) packageDependencies(ctx context.Context, repoUrlPath
 	if len(timedout) > 0 {
 		log15.Warn("non-zero number of timed-out npm invocations", "count", len(timedout), "dependencies", timedout)
 	}
+	var totalConfigMatched = len(matchingDependencies)
 
-	// TODO: [npm-package-support-database] Implement DB code path.
+	parsedPackage, err := reposource.ParseNPMPackageFromRepoURL(repoUrlPath)
+	if err != nil {
+		return nil, err
+	}
+	dbDeps, err := s.DBStore.GetNPMDependencyRepos(ctx, dbstore.GetNPMDependencyReposOpts{
+		ArtifactName: parsedPackage.PackageSyntax(),
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get npm dependencies from dbStore")
+	}
+
+	for _, dbDep := range dbDeps {
+		parsedDbPackage, err := reposource.ParseNPMPackageFromPackageSyntax(dbDep.Package)
+		if err != nil {
+			log15.Error("failed to parse npm package", "package", dbDep.Package, "message", err)
+			continue
+		}
+		if *repoPackage == *parsedDbPackage {
+			matchingDependencies = append(matchingDependencies, reposource.NPMDependency{
+				NPMPackage: *parsedDbPackage,
+				Version:    dbDep.Version,
+			})
+		}
+	}
+	var totalDBMatched = len(matchingDependencies) - totalConfigMatched
 
 	if len(matchingDependencies) == 0 {
 		return nil, errors.Errorf("no NPM dependencies for URL path %s", repoUrlPath)
 	}
 
-	log15.Info("fetched npm artifact for repo path", "repoPath", repoUrlPath, "totalConfig", len(matchingDependencies))
+	log15.Info("fetched npm artifact for repo path", "repoPath", repoUrlPath,
+		"totalDB", totalDBMatched, "totalConfig", totalConfigMatched)
 	reposource.SortNPMDependencies(matchingDependencies)
 	return matchingDependencies, nil
 }
