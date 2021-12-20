@@ -14,7 +14,7 @@ import { TelemetryProps } from '@sourcegraph/shared/src/telemetry/telemetryServi
 import { ThemeProps } from '@sourcegraph/shared/src/theme'
 import { ErrorLike, isErrorLike, asError } from '@sourcegraph/shared/src/util/errors'
 
-import { AuthenticatedUser } from '../../auth'
+import { AuthenticatedUser, refreshAuthenticatedUser } from '../../auth'
 import { requestGraphQL } from '../../backend/graphql'
 import { BatchChangesProps } from '../../batches'
 import { ErrorMessage } from '../../components/alerts'
@@ -279,7 +279,9 @@ export class OrgArea extends React.Component<Props> {
             this.props.history.push('/user/settings')
             return
         }
-        this.refreshRequests.next()
+        refreshAuthenticatedUser()
+            .toPromise()
+            .then(() => this.refreshRequests.next())
     }
 
     private onDidUpdateOrganization = (): void => this.refreshRequests.next()
