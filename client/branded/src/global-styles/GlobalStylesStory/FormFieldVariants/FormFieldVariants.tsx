@@ -1,6 +1,9 @@
+import 'storybook-addon-designs'
+
 import classNames from 'classnames'
 import React from 'react'
-import 'storybook-addon-designs'
+
+import { TextArea } from '@sourcegraph/wildcard'
 
 import styles from './FormFieldVariants.module.scss'
 
@@ -58,13 +61,13 @@ export const FormFieldVariants: React.FunctionComponent = () => (
         <WithVariants
             field={({ className, message, ...props }) => (
                 <fieldset className="form-group">
-                    <textarea
+                    <TextArea
+                        message={message}
                         placeholder="This is sample content in a text area that spans four lines to see how it fits."
-                        className={classNames('form-control', className)}
+                        className={className}
                         rows={4}
                         {...props}
                     />
-                    {message}
                 </fieldset>
             )}
         />

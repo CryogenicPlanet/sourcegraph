@@ -5,7 +5,7 @@ import { Form } from '@sourcegraph/branded/src/components/Form'
 import { LoadingSpinner } from '@sourcegraph/react-loading-spinner'
 import { useMutation } from '@sourcegraph/shared/src/graphql/apollo'
 import { gql } from '@sourcegraph/shared/src/graphql/graphql'
-import { Button } from '@sourcegraph/wildcard'
+import { Button, TextArea } from '@sourcegraph/wildcard'
 
 import { AuthenticatedUser } from '../auth'
 import { SubmitSurveyResult, SubmitSurveyVariables } from '../graphql-operations'
@@ -110,9 +110,8 @@ export const SurveyForm: React.FunctionComponent<SurveyFormProps> = ({ authentic
                 <label className={styles.label} htmlFor="survey-form-score-reason">
                     What is the most important reason for the score you gave Sourcegraph?
                 </label>
-                <textarea
+                <TextArea
                     id="survey-form-score-reason"
-                    className="form-control"
                     onChange={event => setReason(event.target.value)}
                     value={reason}
                     disabled={response.loading}
@@ -123,9 +122,8 @@ export const SurveyForm: React.FunctionComponent<SurveyFormProps> = ({ authentic
                 <label className={styles.label} htmlFor="survey-form-better-product">
                     What could Sourcegraph do to provide a better product?
                 </label>
-                <textarea
+                <TextArea
                     id="survey-form-better-product"
-                    className="form-control"
                     onChange={event => setBetterProduct(event.target.value)}
                     value={betterProduct}
                     disabled={response.loading}
