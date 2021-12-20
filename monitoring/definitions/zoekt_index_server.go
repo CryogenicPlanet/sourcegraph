@@ -100,7 +100,7 @@ func ZoektIndexServer() *monitoring.Container {
 							// This value can spike, so only if we have a
 							// sustained error rate do we alert.
 							Warning:  monitoring.Alert().GreaterOrEqual(100, nil).For(time.Minute),
-							Critical: monitoring.Alert().GreaterOrEqual(100, nil).For(10 * time.Minute),
+							Critical: monitoring.Alert().GreaterOrEqual(100, nil).For(20 * time.Minute),
 							Panel:    monitoring.Panel().Min(0),
 							Owner:    monitoring.ObservableOwnerSearchCore,
 							PossibleSolutions: `
@@ -117,6 +117,22 @@ func ZoektIndexServer() *monitoring.Container {
 								sustained periods of errors is there an underlying issue. When sustained
 								this indicates repositories will not get updated indexes.
 							`,
+						},
+					},
+				},
+			},
+			{
+				Title: "Indexing queue statistics",
+				Rows: []monitoring.Row{
+					{
+						{
+							Name:           "indexed_queue_size",
+							Description:    "number of outstanding index jobs",
+							Query:          "sum(index_queue_len)", // total queue size amongst all index-server replicas
+							NoAlert:        true,
+							Panel:          monitoring.Panel().LegendFormat("jobs"),
+							Owner:          monitoring.ObservableOwnerSearchCore,
+							Interpretation: "A queue that is constantly growing could be a leading indicator of a bottleneck or under-provisioning",
 						},
 					},
 				},

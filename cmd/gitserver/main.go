@@ -271,7 +271,17 @@ func getDB() (*sql.DB, error) {
 	dsn := conf.GetServiceConnectionValueAndRestartOnChange(func(serviceConnections conftypes.ServiceConnections) string {
 		return serviceConnections.PostgresDSN
 	})
-	return connections.NewFrontendDB(dsn, "gitserver", false, &observation.TestContext)
+	var (
+		sqlDB *sql.DB
+		err   error
+	)
+	if os.Getenv("NEW_MIGRATIONS") == "" {
+		// CURRENTLY DEPRECATING
+		sqlDB, err = connections.NewFrontendDB(dsn, "gitserver", false, &observation.TestContext)
+	} else {
+		sqlDB, err = connections.EnsureNewFrontendDB(dsn, "gitserver", &observation.TestContext)
+	}
+	return sqlDB, err
 }
 
 func getVCSSyncer(ctx context.Context, externalServiceStore database.ExternalServiceStore, repoStore database.RepoStore,
@@ -319,6 +329,12 @@ func getVCSSyncer(ctx context.Context, externalServiceStore database.ExternalSer
 			return nil, err
 		}
 		return &server.JVMPackagesSyncer{Config: &c, DBStore: codeintelDB}, nil
+	case extsvc.TypeNPMPackages:
+		var c schema.NPMPackagesConnection
+		if err := extractOptions(&c); err != nil {
+			return nil, err
+		}
+		return &server.NPMPackagesSyncer{Config: &c}, nil
 	}
 	return &server.GitRepoSyncer{}, nil
 }

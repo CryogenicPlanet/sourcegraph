@@ -23,6 +23,7 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/peterbourgon/ff/v3/ffcli"
 
+	"github.com/sourcegraph/sourcegraph/dev/sg/internal/stdout"
 	"github.com/sourcegraph/sourcegraph/dev/sg/root"
 	"github.com/sourcegraph/sourcegraph/internal/database/postgresdsn"
 	"github.com/sourcegraph/sourcegraph/lib/output"
@@ -62,7 +63,7 @@ func getUserShellConfigPath(ctx context.Context) string {
 
 func setupExec(ctx context.Context, args []string) error {
 	if runtime.GOOS != "linux" && runtime.GOOS != "darwin" {
-		out.WriteLine(output.Linef("", output.StyleWarning, "'sg setup' currently only supports macOS and Linux"))
+		stdout.Out.WriteLine(output.Linef("", output.StyleWarning, "'sg setup' currently only supports macOS and Linux"))
 		os.Exit(1)
 	}
 
@@ -83,8 +84,8 @@ func setupExec(ctx context.Context, args []string) error {
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		for range c {
-			writeOrangeLine("\n💡 You may need to restart your shell for the changes to work in this terminal.")
-			writeOrangeLine("   Close this terminal and open a new one or type the following command and press ENTER: " + filepath.Base(getUserShellPath(ctx)))
+			writeOrangeLinef("\n💡 You may need to restart your shell for the changes to work in this terminal.")
+			writeOrangeLinef("   Close this terminal and open a new one or type the following command and press ENTER: " + filepath.Base(getUserShellPath(ctx)))
 			os.Exit(0)
 		}
 	}()
@@ -94,7 +95,7 @@ func setupExec(ctx context.Context, args []string) error {
 		categories = macOSDependencies
 	} else {
 		// DEPRECATED: The new 'sg setup' doesn't work on Linux yet, so we fall back to the old one.
-		writeWarningLine("'sg setup' on Linux provides instructions for Ubuntu Linux. If you're using another distribution, instructions might need to be adjusted.")
+		writeWarningLinef("'sg setup' on Linux provides instructions for Ubuntu Linux. If you're using another distribution, instructions might need to be adjusted.")
 		return deprecatedSetupForLinux(ctx)
 	}
 
@@ -113,62 +114,62 @@ func setupExec(ctx context.Context, args []string) error {
 	}
 
 	for len(failed) != 0 {
-		out.ClearScreen()
+		stdout.Out.ClearScreen()
 
-		writeOrangeLine("-------------------------------------")
-		writeOrangeLine("|        Welcome to sg setup!       |")
-		writeOrangeLine("-------------------------------------")
-		writeOrangeLine("Quit any time by typing ctrl-c\n")
+		writeOrangeLinef("-------------------------------------")
+		writeOrangeLinef("|        Welcome to sg setup!       |")
+		writeOrangeLinef("-------------------------------------")
+		writeOrangeLinef("Quit any time by typing ctrl-c\n")
 
 		for i, category := range categories {
 			idx := i + 1
 
 			if category.requiresRepository && !inRepo {
-				writeSkippedLine("%d. %s %s[SKIPPED. Requires 'sg setup' to be run in 'sourcegraph' repository]%s", idx, category.name, output.StyleBold, output.StyleReset)
+				writeSkippedLinef("%d. %s %s[SKIPPED. Requires 'sg setup' to be run in 'sourcegraph' repository]%s", idx, category.name, output.StyleBold, output.StyleReset)
 				skipped = append(skipped, idx)
 				failed = removeEntry(failed, i)
 				continue
 			}
 
-			pending := out.Pending(output.Linef("", output.StylePending, "%d. %s - Determining status...", idx, category.name))
+			pending := stdout.Out.Pending(output.Linef("", output.StylePending, "%d. %s - Determining status...", idx, category.name))
 			category.Update(ctx)
 			pending.Destroy()
 
 			if combined := category.CombinedState(); combined {
-				writeSuccessLine("%d. %s", idx, category.name)
+				writeSuccessLinef("%d. %s", idx, category.name)
 				failed = removeEntry(failed, i)
 			} else {
 				nonEmployeeState := category.CombinedStateNonEmployees()
 				if nonEmployeeState {
-					writeWarningLine("%d. %s", idx, category.name)
+					writeWarningLinef("%d. %s", idx, category.name)
 					employeeFailed = append(skipped, idx)
 				} else {
-					writeFailureLine("%d. %s", idx, category.name)
+					writeFailureLinef("%d. %s", idx, category.name)
 				}
 			}
 		}
 
 		if len(failed) == 0 && len(employeeFailed) == 0 {
 			if len(skipped) == 0 && len(employeeFailed) == 0 {
-				out.Write("")
-				out.WriteLine(output.Linef(output.EmojiOk, output.StyleBold, "Everything looks good! Happy hacking!"))
+				stdout.Out.Write("")
+				stdout.Out.WriteLine(output.Linef(output.EmojiOk, output.StyleBold, "Everything looks good! Happy hacking!"))
 			}
 
 			if len(skipped) != 0 {
-				out.Write("")
-				writeWarningLine("Some checks were skipped because 'sg setup' is not run in the 'sourcegraph' repository.")
-				writeFingerPointingLine("Restart 'sg setup' in the 'sourcegraph' repository to continue.")
+				stdout.Out.Write("")
+				writeWarningLinef("Some checks were skipped because 'sg setup' is not run in the 'sourcegraph' repository.")
+				writeFingerPointingLinef("Restart 'sg setup' in the 'sourcegraph' repository to continue.")
 			}
 
 			return nil
 		}
 
-		out.Write("")
+		stdout.Out.Write("")
 
 		if len(employeeFailed) != 0 && len(failed) == len(employeeFailed) {
-			writeWarningLine("Some checks that are only relevant for Sourcegraph employees failed.\nIf you're not a Sourcegraph employee you're good to go. Hit Ctrl-C.\n\nIf you're a Sourcegraph employee: which one do you want to fix?")
+			writeWarningLinef("Some checks that are only relevant for Sourcegraph employees failed.\nIf you're not a Sourcegraph employee you're good to go. Hit Ctrl-C.\n\nIf you're a Sourcegraph employee: which one do you want to fix?")
 		} else {
-			writeWarningLine("Some checks failed. Which one do you want to fix?")
+			writeWarningLinef("Some checks failed. Which one do you want to fix?")
 		}
 
 		idx, err := getNumberOutOf(all)
@@ -180,7 +181,7 @@ func setupExec(ctx context.Context, args []string) error {
 		}
 		selectedCategory := categories[idx]
 
-		out.ClearScreen()
+		stdout.Out.ClearScreen()
 
 		err = presentFailedCategoryWithOptions(ctx, idx, &selectedCategory)
 		if err != nil {
@@ -457,7 +458,7 @@ func deprecatedSetupForLinux(ctx context.Context) error {
 		if instruction.ifBool != "" {
 			val, ok := conditions[instruction.ifBool]
 			if !ok {
-				out.WriteLine(output.Line("", output.StyleWarning, "Something went wrong."))
+				stdout.Out.WriteLine(output.Line("", output.StyleWarning, "Something went wrong."))
 				os.Exit(1)
 			}
 			if !val {
@@ -467,7 +468,7 @@ func deprecatedSetupForLinux(ctx context.Context) error {
 		if instruction.ifNotBool != "" {
 			val, ok := conditions[instruction.ifNotBool]
 			if !ok {
-				out.WriteLine(output.Line("", output.StyleWarning, "Something went wrong."))
+				stdout.Out.WriteLine(output.Line("", output.StyleWarning, "Something went wrong."))
 				os.Exit(1)
 			}
 			if val {
@@ -476,20 +477,20 @@ func deprecatedSetupForLinux(ctx context.Context) error {
 		}
 
 		i++
-		out.WriteLine(output.Line("", output.StylePending, "------------------------------------------"))
-		out.Writef("%sStep %d:%s%s %s%s", output.StylePending, i, output.StyleReset, output.StyleSuccess, instruction.prompt, output.StyleReset)
-		out.Write("")
+		stdout.Out.WriteLine(output.Line("", output.StylePending, "------------------------------------------"))
+		stdout.Out.Writef("%sStep %d:%s%s %s%s", output.StylePending, i, output.StyleReset, output.StyleSuccess, instruction.prompt, output.StyleReset)
+		stdout.Out.Write("")
 
 		if instruction.comment != "" {
-			out.Write(instruction.comment)
-			out.Write("")
+			stdout.Out.Write(instruction.comment)
+			stdout.Out.Write("")
 		}
 
 		if instruction.command != "" {
-			out.WriteLine(output.Line("", output.StyleSuggestion, "Run the following command(s) in another terminal:\n"))
-			out.WriteLine(output.Line("", output.CombineStyles(output.StyleBold, output.StyleYellow), strings.TrimSpace(instruction.command)))
+			stdout.Out.WriteLine(output.Line("", output.StyleSuggestion, "Run the following command(s) in another terminal:\n"))
+			stdout.Out.WriteLine(output.Line("", output.CombineStyles(output.StyleBold, output.StyleYellow), strings.TrimSpace(instruction.command)))
 
-			out.WriteLine(output.Linef("", output.StyleSuggestion, "Hit return to confirm that you ran the command..."))
+			stdout.Out.WriteLine(output.Linef("", output.StyleSuggestion, "Hit return to confirm that you ran the command..."))
 			input := bufio.NewScanner(os.Stdin)
 			input.Scan()
 		}
@@ -699,7 +700,7 @@ func getBool() bool {
 }
 
 func presentFailedCategoryWithOptions(ctx context.Context, categoryIdx int, category *dependencyCategory) error {
-	printCategoryHeaderAndDependencies(categoryIdx, category)
+	printCategoryHeaderAndDependencies(categoryIdx+1, category)
 
 	choices := map[int]string{1: "I want to fix these manually"}
 	if category.autoFixing {
@@ -718,7 +719,7 @@ func presentFailedCategoryWithOptions(ctx context.Context, categoryIdx int, cate
 	case 1:
 		err = fixCategoryManually(ctx, categoryIdx, category)
 	case 2:
-		out.ClearScreen()
+		stdout.Out.ClearScreen()
 		err = fixCategoryAutomatically(ctx, category)
 	case 3:
 		return nil
@@ -727,20 +728,20 @@ func presentFailedCategoryWithOptions(ctx context.Context, categoryIdx int, cate
 }
 
 func printCategoryHeaderAndDependencies(categoryIdx int, category *dependencyCategory) {
-	out.WriteLine(output.Linef(output.EmojiLightbulb, output.CombineStyles(output.StyleSearchQuery, output.StyleBold), "%d. %s", categoryIdx, category.name))
-	out.Write("")
-	out.Write("Checks:")
+	stdout.Out.WriteLine(output.Linef(output.EmojiLightbulb, output.CombineStyles(output.StyleSearchQuery, output.StyleBold), "%d. %s", categoryIdx, category.name))
+	stdout.Out.Write("")
+	stdout.Out.Write("Checks:")
 
 	for i, dep := range category.dependencies {
 		idx := i + 1
 		if dep.IsMet() {
-			writeSuccessLine("%d. %s", idx, dep.name)
+			writeSuccessLinef("%d. %s", idx, dep.name)
 		} else {
 			var printer func(fmtStr string, args ...interface{})
 			if dep.onlyEmployees {
-				printer = writeWarningLine
+				printer = writeWarningLinef
 			} else {
-				printer = writeFailureLine
+				printer = writeFailureLinef
 			}
 
 			if dep.err != nil {
@@ -777,20 +778,20 @@ func fixCategoryAutomatically(ctx context.Context, category *dependencyCategory)
 }
 
 func fixDependencyAutomatically(ctx context.Context, dep *dependency) error {
-	writeFingerPointingLine("Trying my hardest to fix %q automatically...", dep.name)
+	writeFingerPointingLinef("Trying my hardest to fix %q automatically...", dep.name)
 
 	cmd := execFreshShell(ctx, dep.InstructionsCommands(ctx))
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		writeFailureLine("Failed to run command: %s", err)
+		writeFailureLinef("Failed to run command: %s", err)
 		return err
 	}
 
-	writeSuccessLine("Done! %q should be fixed now!", dep.name)
+	writeSuccessLinef("Done! %q should be fixed now!", dep.name)
 
 	if dep.requiresSgSetupRestart {
-		writeFingerPointingLine("This command requires restarting of 'sg setup' to pick up the changes.")
+		writeFingerPointingLinef("This command requires restarting of 'sg setup' to pick up the changes.")
 		os.Exit(0)
 	}
 
@@ -818,7 +819,7 @@ func fixCategoryManually(ctx context.Context, categoryIdx int, category *depende
 		if len(toFix) == 1 {
 			idx = toFix[0]
 		} else {
-			writeFingerPointingLine("Which one do you want to fix?")
+			writeFingerPointingLinef("Which one do you want to fix?")
 			var err error
 			idx, err = getNumberOutOf(toFix)
 			if err != nil {
@@ -831,36 +832,36 @@ func fixCategoryManually(ctx context.Context, categoryIdx int, category *depende
 
 		dep := category.dependencies[idx]
 
-		out.WriteLine(output.Linef(output.EmojiFailure, output.CombineStyles(output.StyleWarning, output.StyleBold), "%s", dep.name))
-		out.Write("")
+		stdout.Out.WriteLine(output.Linef(output.EmojiFailure, output.CombineStyles(output.StyleWarning, output.StyleBold), "%s", dep.name))
+		stdout.Out.Write("")
 
 		if dep.err != nil {
-			out.WriteLine(output.Linef("", output.StyleBold, "Encountered the following error:\n\n%s%s\n", output.StyleReset, dep.err))
+			stdout.Out.WriteLine(output.Linef("", output.StyleBold, "Encountered the following error:\n\n%s%s\n", output.StyleReset, dep.err))
 		}
 
-		out.WriteLine(output.Linef("", output.StyleBold, "How to fix:"))
+		stdout.Out.WriteLine(output.Linef("", output.StyleBold, "How to fix:"))
 
 		if dep.instructionsComment != "" {
-			out.Write("")
-			out.Write(dep.instructionsComment)
+			stdout.Out.Write("")
+			stdout.Out.Write(dep.instructionsComment)
 		}
 
 		// If we don't have anything do run, we simply print instructions to
 		// the user
 		if dep.InstructionsCommands(ctx) == "" {
-			writeFingerPointingLine("Hit return once you're done")
+			writeFingerPointingLinef("Hit return once you're done")
 			waitForReturn()
 		} else {
 			// Otherwise we print the command(s) and ask the user whether we should run it or not
-			out.Write("")
+			stdout.Out.Write("")
 			if category.requiresRepository {
-				out.Writef("Run the following command(s) %sin the 'sourcegraph' repository%s:", output.StyleBold, output.StyleReset)
+				stdout.Out.Writef("Run the following command(s) %sin the 'sourcegraph' repository%s:", output.StyleBold, output.StyleReset)
 			} else {
-				out.Write("Run the following command(s):")
+				stdout.Out.Write("Run the following command(s):")
 			}
-			out.Write("")
+			stdout.Out.Write("")
 
-			out.WriteLine(output.Line("", output.CombineStyles(output.StyleBold, output.StyleYellow), strings.TrimSpace(dep.InstructionsCommands(ctx))))
+			stdout.Out.WriteLine(output.Line("", output.CombineStyles(output.StyleBold, output.StyleYellow), strings.TrimSpace(dep.InstructionsCommands(ctx))))
 
 			choice, err := getChoice(map[int]string{
 				1: "I'll fix this manually (either by running the command or doing something else)",
@@ -873,7 +874,7 @@ func fixCategoryManually(ctx context.Context, categoryIdx int, category *depende
 
 			switch choice {
 			case 1:
-				writeFingerPointingLine("Hit return once you're done")
+				writeFingerPointingLinef("Hit return once you're done")
 				waitForReturn()
 			case 2:
 				if err := fixDependencyAutomatically(ctx, dep); err != nil {
@@ -884,7 +885,7 @@ func fixCategoryManually(ctx context.Context, categoryIdx int, category *depende
 			}
 		}
 
-		pending := out.Pending(output.Linef("", output.StylePending, "Determining status..."))
+		pending := stdout.Out.Pending(output.Linef("", output.StylePending, "Determining status..."))
 		for _, dep := range category.dependencies {
 			dep.Update(ctx)
 		}
@@ -1234,8 +1235,8 @@ func waitForReturn() { fmt.Scanln() }
 
 func getChoice(choices map[int]string) (int, error) {
 	for {
-		out.Write("")
-		writeFingerPointingLine("What do you want to do?")
+		stdout.Out.Write("")
+		writeFingerPointingLinef("What do you want to do?")
 
 		for i := 0; i < len(choices); i++ {
 			num := i + 1
@@ -1243,7 +1244,7 @@ func getChoice(choices map[int]string) (int, error) {
 			if !ok {
 				return 0, errors.Newf("internal error: %d not found in provided choices", i)
 			}
-			out.Writef("%s[%d]%s: %s", output.StyleBold, num, output.StyleReset, desc)
+			stdout.Out.Writef("%s[%d]%s: %s", output.StyleBold, num, output.StyleReset, desc)
 		}
 
 		fmt.Printf("Enter choice: ")
@@ -1257,7 +1258,7 @@ func getChoice(choices map[int]string) (int, error) {
 		if _, ok := choices[s]; ok {
 			return s, nil
 		}
-		writeFailureLine("Invalid choice")
+		writeFailureLinef("Invalid choice")
 	}
 }
 

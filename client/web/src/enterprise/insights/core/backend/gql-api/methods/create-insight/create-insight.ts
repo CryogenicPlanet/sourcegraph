@@ -6,9 +6,10 @@ import {
     CreateLangStatsInsightResult,
     CreateSearchBasedInsightResult,
     FirstStepCreateSearchBasedInsightResult,
+    GetDashboardInsightsResult,
+    GetDashboardInsightsVariables,
+    InsightViewNode,
     PieChartSearchInsightInput,
-    UpdateLineChartSearchInsightResult,
-    UpdateLineChartSearchInsightVariables,
 } from '../../../../../../../graphql-operations'
 import {
     CaptureGroupInsight,
@@ -18,11 +19,11 @@ import {
     isVirtualDashboard,
     SearchBasedInsight,
 } from '../../../../types'
-import { SearchBackendBasedInsight } from '../../../../types/insight/search-insight'
 import { InsightCreateInput } from '../../../code-insights-backend-types'
 import { createInsightView } from '../../deserialization/create-insight-view'
+import { GET_DASHBOARD_INSIGHTS_GQL } from '../../gql/GetDashboardInsights'
 import { INSIGHT_VIEW_FRAGMENT } from '../../gql/GetInsights'
-import { getSearchInsightUpdateInput } from '../update-insight/serializators'
+import { updateInsight, UpdateResult } from '../update-insight/update-insight'
 
 import { getInsightCreateGqlInput, getLangStatsInsightCreateInput } from './serializators'
 
@@ -70,7 +71,6 @@ function createSearchBasedInsight(
     // supports filters in the create insight mutation.
     // TODO: Remove this imperative logic as soon as be supports filters
     if (insight.type === InsightExecutionType.Backend && insight.filters) {
-        const filters = insight.filters
         return from(
             apolloClient.mutate<FirstStepCreateSearchBasedInsightResult>({
                 mutation: gql`
@@ -93,25 +93,15 @@ function createSearchBasedInsight(
                     return of()
                 }
 
-                const createdInsight = createInsightView(
-                    data.createLineChartSearchInsight.view
-                ) as SearchBackendBasedInsight
+                const createdInsight = {
+                    ...createInsightView(data.createLineChartSearchInsight.view),
+                    filters: insight.filters,
+                }
 
-                const input = getSearchInsightUpdateInput({ ...createdInsight, filters })
-
-                return apolloClient.mutate<UpdateLineChartSearchInsightResult, UpdateLineChartSearchInsightVariables>({
-                    mutation: gql`
-                        mutation UpdateLineChartSearchInsight($input: UpdateLineChartSearchInsightInput!, $id: ID!) {
-                            updateLineChartSearchInsight(input: $input, id: $id) {
-                                view {
-                                    ...InsightViewNode
-                                }
-                            }
-                        }
-                        ${INSIGHT_VIEW_FRAGMENT}
-                    `,
-                    variables: { input, id: createdInsight.id },
-                    update(cache, result) {
+                return updateInsight(
+                    apolloClient,
+                    { oldInsight: createdInsight, newInsight: createdInsight },
+                    (cache, result) => {
                         const { data } = result
 
                         if (!data) {
@@ -119,8 +109,8 @@ function createSearchBasedInsight(
                         }
 
                         searchInsightCreationOptimisticUpdate(cache, data, dashboard)
-                    },
-                })
+                    }
+                )
             })
         )
     }
@@ -146,71 +136,53 @@ function createSearchBasedInsight(
  * add newly created insight to the cache dashboard that insight was crated from.
  */
 function searchInsightCreationOptimisticUpdate(
-    cache: ApolloCache<object>,
-    data: UpdateLineChartSearchInsightResult,
+    cache: ApolloCache<unknown>,
+    data: UpdateResult,
     dashboard: InsightDashboard | null
 ): void {
+    const createInsightIdRaw =
+        'updateLineChartSearchInsight' in data
+            ? data.updateLineChartSearchInsight.view.id
+            : data.updatePieChartSearchInsight.view.id
+
     const createdInsightId = cache.identify({
         __typename: 'InsightView',
-        id: data.updateLineChartSearchInsight.view.id,
+        id: createInsightIdRaw,
+    })
+
+    const cachedInsight = cache.readFragment<InsightViewNode>({
+        id: createdInsightId,
+        fragment: INSIGHT_VIEW_FRAGMENT,
     })
 
     if (dashboard && !isVirtualDashboard(dashboard)) {
-        const Insight = cache.readFragment<any>({
-            id: createdInsightId,
-            fragment: INSIGHT_VIEW_FRAGMENT,
+        const cachedDashboardQuery = cache.readQuery<GetDashboardInsightsResult, GetDashboardInsightsVariables>({
+            query: GET_DASHBOARD_INSIGHTS_GQL,
+            variables: { id: dashboard.id },
         })
 
-        const dashboardReference = cache.identify({
-            __typename: 'InsightsDashboard',
-            id: dashboard?.id ?? '',
-        })
+        if (!cachedDashboardQuery || !cachedInsight) {
+            return
+        }
 
-        const cachedDashboard = cache.readFragment<any>({
-            id: dashboardReference,
-            fragmentName: 'DashboardFragment',
-            fragment: gql`
-                fragment DashboardFragment on InsightsDashboard {
-                    id
-                    title
-                    views {
-                        nodes {
-                            ...InsightViewNode
-                        }
-                    }
-                    grants {
-                        users
-                        organizations
-                        global
-                    }
-                }
-                ${INSIGHT_VIEW_FRAGMENT}
-            `,
-        })
+        const cachedDashboard = cachedDashboardQuery.insightsDashboards.nodes[0]
+        const cachedDashboardInsights = [...(cachedDashboard.views?.nodes ?? [])]
+        const updatedDashboard = {
+            ...cachedDashboard,
+            views: {
+                ...cachedDashboard.views,
+                nodes: [...cachedDashboardInsights, cachedInsight],
+            },
+        }
 
-        cache.writeFragment({
-            id: dashboardReference,
-            fragmentName: 'DashboardFragment',
-            fragment: gql`
-                fragment DashboardFragment on InsightsDashboard {
-                    id
-                    title
-                    views {
-                        nodes {
-                            ...InsightViewNode
-                        }
-                    }
-                    grants {
-                        users
-                        organizations
-                        global
-                    }
-                }
-                ${INSIGHT_VIEW_FRAGMENT}
-            `,
+        cache.writeQuery<GetDashboardInsightsResult>({
+            query: GET_DASHBOARD_INSIGHTS_GQL,
+            variables: { id: dashboard.id },
             data: {
-                ...cachedDashboard,
-                views: { nodes: [...cachedDashboard.views.nodes, Insight] },
+                insightsDashboards: {
+                    ...cachedDashboardQuery.insightsDashboards,
+                    nodes: [updatedDashboard],
+                },
             },
         })
     }

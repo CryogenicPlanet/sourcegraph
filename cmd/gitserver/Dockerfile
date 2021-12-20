@@ -19,6 +19,7 @@ RUN wget -O coursier.zip https://github.com/sourcegraph/lsif-java/releases/downl
     mv cs-musl /usr/local/bin/coursier && \
     chmod +x /usr/local/bin/coursier
 
+
 FROM sourcegraph/alpine-3.12:120059_2021-12-09_b34c7b2@sha256:9a1fde12f56fea02027cf4caeebdddfedb7b73bf8db6c16f7907a6e04a29134c
 
 ARG COMMIT_SHA="unknown"
@@ -32,11 +33,16 @@ LABEL com.sourcegraph.github.url=https://github.com/sourcegraph/sourcegraph/comm
 
 # hadolint ignore=DL3018
 RUN apk add --no-cache \
-    # We require git>=2.30 because we use git maintenance.
-    'git>=2.30' --repository=http://dl-cdn.alpinelinux.org/alpine/v3.15/main  \
+    # We require git 2.34.1 because we use git-repack with flag --write-midx.
+    'git=~2.34.1' --repository=http://dl-cdn.alpinelinux.org/alpine/v3.15/main  \
     git-p4 \
     && apk add --no-cache  \
     openssh-client \
+    # We require g++, gcc, perl and make to install openssl
+    g++ \
+    gcc \
+	perl \
+    make \
     python2 \
     python3
 
@@ -51,5 +57,8 @@ RUN tar zxf /lib-x64.tgz --directory /
 
 RUN mkdir -p /data/repos && chown -R sourcegraph:sourcegraph /data/repos
 USER sourcegraph
+
+WORKDIR /
+
 ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/gitserver"]
 COPY gitserver /usr/local/bin/
