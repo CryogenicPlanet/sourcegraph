@@ -1,5 +1,4 @@
 import classNames from 'classnames'
-import BookOutlineIcon from 'mdi-react/BookOutlineIcon'
 import React, { useCallback } from 'react'
 
 import { Link } from '@sourcegraph/shared/src/components/Link'
@@ -9,12 +8,13 @@ import { ThemeProps } from '@sourcegraph/shared/src/theme'
 import { communitySearchContextsList } from '../../communitySearchContexts/HomepageConfig'
 import { SyntaxHighlightedSearchQuery } from '../../components/SyntaxHighlightedSearchQuery'
 import { FeatureFlagProps } from '../../featureFlags/featureFlags'
+import { OnboardingTour } from '../../onboarding-tour/OnboardingTour'
 import { ModalVideo } from '../documentation/ModalVideo'
 
 import { CustomersSection } from './CustomersSection'
 import { DynamicWebFonts } from './DynamicWebFonts'
 import { HeroSection } from './HeroSection'
-import { SearchExample, exampleNotebooks, exampleQueries, fonts } from './LoggedOutHomepage.constants'
+import { SearchExample, exampleQueries, fonts } from './LoggedOutHomepage.constants'
 import styles from './LoggedOutHomepage.module.scss'
 import { SelfHostInstructions } from './SelfHostInstructions'
 import { VulnerabilityAnnouncement } from './VulnerabilityAnnouncement'
@@ -28,6 +28,20 @@ interface SearchExamplesProps extends TelemetryProps {
     icon: JSX.Element
 }
 
+/**
+ * NOTE: Don't remove because it will be used in Vs Code home page
+ * TODO: Move to client/vscode once it is merged to main branch
+ *
+ * @example <SearchExamples
+                title="Search examples"
+                subtitle="Find answers faster with code search across multiple repos and commits"
+                examples={exampleQueries}
+                icon={<MagnifyingGlassSearchIcon />}
+                {...props}
+            />
+ */
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 const SearchExamples: React.FunctionComponent<SearchExamplesProps> = ({
     title,
     subtitle,
@@ -71,28 +85,59 @@ const SearchExamples: React.FunctionComponent<SearchExamplesProps> = ({
     )
 }
 
+interface TipsAndTricksProps extends TelemetryProps {
+    title: string
+    examples: SearchExample[]
+    moreLink: {
+        href: string
+        label: string
+    }
+}
+const TipsAndTricks: React.FunctionComponent<TipsAndTricksProps> = ({
+    title,
+    moreLink,
+    telemetryService,
+    examples,
+}) => {
+    const searchExampleClicked = useCallback(
+        (trackEventName: string) => (): void => telemetryService.log(trackEventName),
+        [telemetryService]
+    )
+    return (
+        <div className={classNames(styles.tipsAndTricks)}>
+            <div className={classNames('mb-2', styles.title)}>{title}</div>
+            <div className={styles.tipsAndTricksExamples}>
+                {examples.map(example => (
+                    <div key={example.query} className={styles.tipsAndTricksExample}>
+                        {example.label}
+                        <Link
+                            to={example.to}
+                            className={classNames('card', styles.tipsAndTricksCard)}
+                            onClick={searchExampleClicked(example.trackEventName)}
+                        >
+                            <SyntaxHighlightedSearchQuery query={example.query} />
+                        </Link>
+                    </div>
+                ))}
+            </div>
+            <a className={styles.tipsAndTricksMore} href={moreLink.href}>
+                {moreLink.label}
+            </a>
+        </div>
+    )
+}
+
 export const LoggedOutHomepage: React.FunctionComponent<LoggedOutHomepageProps> = props => (
     <DynamicWebFonts fonts={fonts}>
         <div className={styles.loggedOutHomepage}>
             <VulnerabilityAnnouncement />
             <div className={styles.helpContent}>
-                {props.featureFlags.get('search-notebook-onboarding') ? (
-                    <SearchExamples
-                        title="Search notebooks"
-                        subtitle="Three ways code search is more efficient than your IDE"
-                        examples={exampleNotebooks}
-                        icon={<BookOutlineIcon />}
-                        {...props}
-                    />
-                ) : (
-                    <SearchExamples
-                        title="Search examples"
-                        subtitle="Find answers faster with code search across multiple repos and commits"
-                        examples={exampleQueries}
-                        icon={<MagnifyingGlassSearchIcon />}
-                        {...props}
-                    />
-                )}
+                <OnboardingTour
+                    isFixedHeight={true}
+                    className={styles.onboardingTour}
+                    telemetryService={props.telemetryService}
+                />
+
                 <div className={styles.thumbnail}>
                     <div className={classNames(styles.title, 'mb-2')}>Watch and learn</div>
                     <ModalVideo
@@ -110,6 +155,16 @@ export const LoggedOutHomepage: React.FunctionComponent<LoggedOutHomepageProps> 
                         }
                     />
                 </div>
+
+                <TipsAndTricks
+                    title="Tips and Tricks"
+                    examples={exampleQueries}
+                    moreLink={{
+                        label: 'More search features',
+                        href: 'https://about.sourcegraph.com/code-search/',
+                    }}
+                    {...props}
+                />
             </div>
 
             <div className={styles.heroSection}>
@@ -159,6 +214,8 @@ export const LoggedOutHomepage: React.FunctionComponent<LoggedOutHomepageProps> 
     </DynamicWebFonts>
 )
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 const MagnifyingGlassSearchIcon = React.memo(() => (
     <svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path

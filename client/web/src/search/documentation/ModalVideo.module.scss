@@ -1,6 +1,7 @@
 @import 'wildcard/src/global-styles/breakpoints';
 
 .wrapper {
+    margin: 0;
     &:hover button {
         text-decoration: underline;
     }
@@ -15,7 +16,7 @@
 }
 
 .thumbnail-image {
-    width: 11rem;
+    width: 100%;
     // Note: This is to reduce cumulative layout shift
     // It should be as close as possible to the source image aspect ratio
     aspect-ratio: 176/115;
@@ -65,4 +66,8 @@
     left: 0;
     width: 100%;
     height: 100%;
+}
+
+.caption {
+    margin-top: 0.5rem;
 }

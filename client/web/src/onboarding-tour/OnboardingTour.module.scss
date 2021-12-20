@@ -1,0 +1,115 @@
+.card {
+    padding: 0.1875rem;
+    background: linear-gradient(to right, #e4d3fc 0%, #d7f0fd 100%);
+    color: var(--body-color);
+    border-radius: 3px;
+
+    [data-reach-accordion-button] {
+        display: flex;
+        align-items: baseline;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+
+        .arrow-icon-container {
+            margin-right: 0.25rem;
+            margin-left: -0.25rem;
+
+            svg {
+                transform: rotate(-90deg);
+            }
+        }
+
+        &[aria-expanded='true'] {
+            font-weight: bold;
+            .arrow-icon-container svg {
+                transform: none;
+            }
+        }
+    }
+
+    [data-reach-accordion-panel] {
+        margin-left: 1rem;
+        cursor: pointer;
+    }
+}
+
+.cardInner {
+    background-color: var(--body-bg);
+    padding: 1rem;
+    height: 100%;
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cardTitle {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.divider {
+    border: 0;
+    border-top: 1px solid var(--border-color);
+}
+
+.label {
+    margin-right: auto;
+    font-size: 0.875rem;
+    font-weight: normal;
+}
+
+.link {
+    &,
+    &:hover,
+    &:active {
+        text-decoration: none;
+        color: var(--body-color);
+    }
+}
+
+.is-fixed-height {
+    height: 7rem;
+    overflow-y: auto;
+}
+
+.step {
+    display: flex;
+    margin-bottom: 0.5rem;
+}
+
+.progress-bar {
+    width: 0.9rem;
+    height: 0.9rem;
+    margin-right: 1px;
+
+    // stylelint-disable-next-line selector-class-pattern
+    :global(.CircularProgressbar-trail) {
+        stroke: var(--dropdown-border-color);
+    }
+    // stylelint-disable-next-line selector-class-pattern
+    :global(.CircularProgressbar-path) {
+        stroke: var(--oc-green-4);
+    }
+}
+
+.footer-text {
+    margin-left: 0.25rem;
+}
+
+.text {
+    margin: 1rem 0;
+}
+
+.info-panel {
+    padding: 0.5rem;
+    background-color: #ccedff;
+    border: 1px solid #a5d8ff;
+    border-radius: 3px;
+    color: var(--gray-08);
+}

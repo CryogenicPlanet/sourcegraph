@@ -196,11 +196,13 @@ export const repoRevisionContainerRoutes: readonly RepoRevisionContainerRoute[] 
                         className="repo-revision-container__sidebar"
                         isDir={objectType === 'tree'}
                         defaultBranch={defaultBranch || 'HEAD'}
+                        showOnboardingTour={context.isSourcegraphDotCom && !context.authenticatedUser}
                     />
                     {!hideRepoRevisionContent && (
                         // Add `.blob-status-bar__container` because this is the
                         // lowest common ancestor of Blob and the absolutely-positioned Blob status bar
                         <BlobStatusBarContainer>
+                            <div className="onboarding-tour-info-marker" />
                             <ErrorBoundary location={context.location}>
                                 {objectType === 'blob' ? (
                                     <BlobPage

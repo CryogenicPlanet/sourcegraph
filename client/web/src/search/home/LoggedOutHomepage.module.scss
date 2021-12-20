@@ -75,13 +75,40 @@
 }
 
 .help-content {
-    display: flex;
     justify-content: center;
-    margin-bottom: 3rem;
+    display: flex;
+    align-items: stretch;
+    margin: 0 auto;
+
+    & > :not(:last-child) {
+        margin-right: 1rem;
+    }
+
+    & > * {
+        margin-bottom: 1.5rem;
+    }
+
+    @media (--md-breakpoint-down) {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-areas:
+            'tour tour'
+            'video tips';
+    }
 
     @media (--sm-breakpoint-down) {
-        align-items: stretch;
-        flex-direction: column;
+        grid-template-columns: repeat(5, 1fr);
+        grid-template-areas:
+            'tour tour tour tour tour'
+            'video video tips tips tips';
+    }
+
+    @media (--xs-breakpoint-down) {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            'tour'
+            'video'
+            'tips';
     }
 }
 
@@ -116,8 +143,12 @@
 }
 
 .thumbnail {
-    @media (--sm-breakpoint-down) {
-        margin-top: 3.5rem;
+    max-width: 15rem;
+    grid-area: video;
+    @media (--md-breakpoint-down) {
+        max-width: initial;
+    }
+    @media (--xs-breakpoint-down) {
         text-align: center;
     }
 }
@@ -183,4 +214,46 @@
 .self-host-section,
 .customer-section {
     margin-top: 4rem;
+}
+
+.onboarding-tour {
+    grid-area: tour;
+    min-width: 20rem;
+}
+
+.tips-and-tricks {
+    grid-area: tips;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    max-width: 25rem;
+
+    @media (--md-breakpoint-down) {
+        max-width: initial;
+    }
+
+    &-examples {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        flex: 1;
+    }
+
+    &-example {
+        display: flex;
+        align-items: center;
+        margin: 0 2rem 0.5rem 0;
+    }
+
+    &-card {
+        margin-left: 0.25rem;
+        font-size: 0.75rem;
+        text-decoration: none !important;
+        padding: 0.25rem 0.75rem;
+        align-self: center;
+    }
+
+    &-more {
+        margin-top: auto;
+    }
 }

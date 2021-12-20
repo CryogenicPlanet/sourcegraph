@@ -234,6 +234,7 @@ export const StreamingSearchResults: React.FunctionComponent<StreamingSearchResu
 
             <SearchSidebar
                 activation={props.activation}
+                showOnboardingTour={props.isSourcegraphDotCom && !props.authenticatedUser}
                 caseSensitive={caseSensitive}
                 patternType={props.patternType}
                 settingsCascade={props.settingsCascade}

@@ -9,24 +9,34 @@ export interface SearchExample {
 
 export const exampleQueries: SearchExample[] = [
     {
-        label: 'Search all of your repos, without escaping or regex',
-        trackEventName: 'HomepageExampleRepoClicked',
-        query: 'repo:sourcegraph/.* Sprintf("%d -file:tests',
-        to: '/search?q=context:global+repo:sourcegraph/.*+Sprintf%28%22%25d+-file:tests&patternType=literal&case=yes',
+        label: 'Negation:',
+        trackEventName: 'HomepageExampleNegationClicked',
+        query: '-file:tests',
+        to: '/search?q=context:global+r:tests+-file:tests+-file:%28%5E%7C/%29vendor/+auth%28&patternType=literal',
     },
     {
-        label: 'Search and review commits faster than git log and grep',
-        trackEventName: 'HomepageExampleDiffClicked',
-        query: 'type:diff before:"last week" TODO',
-        to:
-            '/search?q=context:global+repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+type:diff+after:"last+week"+select:commit.diff.added+TODO&patternType=literal&case=yes',
+        label: 'Paths:',
+        trackEventName: 'HomepageExamplePathsClicked',
+        query: 'file:web/ui/',
+        to: '/search?q=context:global+r:mono/mono+file:web/ui/+transform+type:symbol&patternType=literal',
     },
     {
-        label: 'Quickly filter by language and other key attributes',
-        trackEventName: 'HomepageExampleFiltersClicked',
-        query: 'repo:sourcegraph lang:go or lang:Typescript',
-        to:
-            '/search?q=context:global+repo:sourcegraph/*+-f:tests+%28lang:TypeScript+or+lang:go%29+Config%28%29&patternType=literal&case=yes',
+        label: 'Search an org’s code:',
+        trackEventName: 'HomepageExampleOrgsClicked',
+        query: 'repo:sourcegraph/.*',
+        to: '/search?q=context:global+repo:sourcegraph/.*&patternType=literal',
+    },
+    {
+        label: 'Operators:',
+        trackEventName: 'HomepageExampleOperatorsClicked',
+        query: '(lang:Typescript or lang:javascript)',
+        to: '/search?q=context:global+%28lang:Typescript+or+lang:javascript%29&patternType=literal',
+    },
+    {
+        label: 'Escaping: ',
+        trackEventName: 'HomepageExampleEscapingClicked',
+        query: 'content:" with spaces"',
+        to: '/search?q=context:global+content:"+with+spaces"&patternType=literal',
     },
 ]
 

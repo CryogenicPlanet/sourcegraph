@@ -11,7 +11,6 @@ interface ModalVideoProps {
     src: string
     thumbnail: { src: string; alt: string }
     onToggle?: (isOpen: boolean) => void
-    showCaption?: boolean
     className?: string
 }
 
@@ -21,7 +20,6 @@ export const ModalVideo: React.FunctionComponent<ModalVideoProps> = ({
     src,
     thumbnail,
     onToggle,
-    showCaption = false,
     className,
 }) => {
     const assetsRoot = window.context?.assetsRoot || ''
@@ -36,31 +34,27 @@ export const ModalVideo: React.FunctionComponent<ModalVideoProps> = ({
         [onToggle]
     )
 
-    let thumbnailElement = (
-        <button type="button" className={styles.thumbnailButton} onClick={() => toggleDialog(true)}>
-            <img src={`${assetsRoot}/${thumbnail.src}`} alt={thumbnail.alt} className={styles.thumbnailImage} />
-            <div className={styles.playIconWrapper}>
-                <PlayIcon />
-            </div>
-        </button>
-    )
+    return (
+        <>
+            <figure className={classNames(styles.wrapper, className)}>
+                <button type="button" className={styles.thumbnailButton} onClick={() => toggleDialog(true)}>
+                    <img src={`${assetsRoot}/${thumbnail.src}`} alt={thumbnail.alt} className={styles.thumbnailImage} />
+                    <div className={styles.playIconWrapper}>
+                        <PlayIcon />
+                    </div>
+                </button>
 
-    if (showCaption) {
-        thumbnailElement = (
-            <figure>
-                {thumbnailElement}
-                <figcaption>
-                    <button type="button" className="btn btn-link" onClick={() => toggleDialog(true)}>
+                <figcaption className={styles.caption}>
+                    <button
+                        type="button"
+                        className="btn btn-link p-0 font-weight-normal"
+                        onClick={() => toggleDialog(true)}
+                    >
                         {title}
                     </button>
                 </figcaption>
             </figure>
-        )
-    }
 
-    return (
-        <>
-            <div className={classNames(styles.wrapper, className)}>{thumbnailElement}</div>
             {isOpen && (
                 <Dialog
                     className={classNames(styles.modal, 'modal-body modal-body--centered p-4 rounded border')}

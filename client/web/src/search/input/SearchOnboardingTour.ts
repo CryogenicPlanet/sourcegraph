@@ -349,6 +349,7 @@ export const useSearchOnboardingTour = ({
     const [hasCancelledTour, setHasCancelledTour] = useTemporarySetting('search.onboarding.tourCancelled', false)
     const [daysActiveCount] = useTemporarySetting('user.daysActiveCount', 0)
 
+    // TODO: clarify if we should disable old search onboarding tour
     const shouldShowTour = useMemo(() => showOnboardingTour && daysActiveCount === 1 && !hasCancelledTour, [
         showOnboardingTour,
         daysActiveCount,

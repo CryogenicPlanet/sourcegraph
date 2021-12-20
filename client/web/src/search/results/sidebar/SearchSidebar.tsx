@@ -9,6 +9,7 @@ import { Filter } from '@sourcegraph/shared/src/search/stream'
 import { SettingsCascadeProps } from '@sourcegraph/shared/src/settings/settings'
 import { TelemetryProps } from '@sourcegraph/shared/src/telemetry/telemetryService'
 
+import { OnboardingTour } from '../../../onboarding-tour/OnboardingTour'
 import { TemporarySettings } from '../../../settings/temporary/TemporarySettings'
 import { useTemporarySetting } from '../../../settings/temporary/useTemporarySetting'
 import { useNavbarQueryState } from '../../../stores'
@@ -30,6 +31,7 @@ export interface SearchSidebarProps
         TelemetryProps {
     filters?: Filter[]
     className?: string
+    showOnboardingTour?: boolean
 }
 
 export enum SectionID {
@@ -126,6 +128,9 @@ export const SearchSidebar: React.FunctionComponent<SearchSidebarProps> = props 
     if (collapsedSections) {
         body = (
             <StickyBox className={styles.searchSidebarStickyBox}>
+                {props.showOnboardingTour && (
+                    <OnboardingTour className="mb-1" telemetryService={props.telemetryService} />
+                )}
                 <SearchSidebarSection
                     sectionId={SectionID.SEARCH_TYPES}
                     className={styles.searchSidebarItem}

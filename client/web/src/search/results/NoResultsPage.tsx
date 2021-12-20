@@ -226,7 +226,6 @@ export const NoResultsPage: React.FunctionComponent<NoResultsPageProps> = ({
                                         src: `${video.thumbnailPrefix}-${isLightTheme ? 'light' : 'dark'}.png`,
                                         alt: `${video.title} video thumbnail`,
                                     }}
-                                    showCaption={true}
                                     onToggle={isOpen => {
                                         if (isOpen) {
                                             telemetryService.log('NoResultsVideoPlayed', { video: video.title })
