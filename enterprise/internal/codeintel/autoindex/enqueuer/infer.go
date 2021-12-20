@@ -3,6 +3,7 @@ package enqueuer
 import (
 	"strings"
 
+	"github.com/sourcegraph/sourcegraph/internal/codeintel/stores/dbstore"
 	"github.com/sourcegraph/sourcegraph/internal/lazyregexp"
 	"github.com/sourcegraph/sourcegraph/lib/codeintel/precise"
 )
@@ -44,14 +45,14 @@ func inferGoRepositoryAndRevision(pkg precise.Package) (string, string, bool) {
 }
 
 func inferJVMRepositoryAndRevision(pkg precise.Package) (string, string, bool) {
-	if pkg.Scheme != "semanticdb" { // TODO: [Varun] deduplicate
+	if pkg.Scheme != dbstore.JVMPackagesScheme {
 		return "", "", false
 	}
 	return pkg.Name, "v" + pkg.Version, true
 }
 
 func inferNPMRepositoryAndRevision(pkg precise.Package) (string, string, bool) {
-	if pkg.Scheme != "npm" { // TODO: [Varun] deduplicate
+	if pkg.Scheme != dbstore.NPMPackagesScheme {
 		return "", "", false
 	}
 	return pkg.Name, "v" + pkg.Version, true

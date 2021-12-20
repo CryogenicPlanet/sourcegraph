@@ -13,6 +13,11 @@ import (
 	"github.com/sourcegraph/sourcegraph/internal/observation"
 )
 
+const (
+	JVMPackagesScheme = "semanticdb"
+	NPMPackagesScheme = "npm"
+)
+
 // RepoName returns the name for the repo with the given identifier.
 func (s *Store) RepoName(ctx context.Context, repositoryID int) (_ string, err error) {
 	ctx, endObservation := s.operations.repoName.With(ctx, &err, observation.Args{LogFields: []log.Field{
@@ -58,7 +63,7 @@ func (s *Store) GetJVMDependencyRepos(ctx context.Context, filter GetJVMDependen
 	defer endObservation(1, observation.Args{})
 
 	conds := make([]*sqlf.Query, 0, 3)
-	conds = append(conds, sqlf.Sprintf("scheme = 'semanticdb'"))
+	conds = append(conds, sqlf.Sprintf("scheme = %s", JVMPackagesScheme))
 
 	if filter.After > 0 {
 		conds = append(conds, sqlf.Sprintf("id > %d", filter.After))
@@ -109,7 +114,7 @@ func (s *Store) GetNPMDependencyRepos(ctx context.Context, filter GetNPMDependen
 	defer endObservation(1, observation.Args{})
 
 	conds := make([]*sqlf.Query, 0, 3)
-	conds = append(conds, sqlf.Sprintf("scheme = %s", "npm")) // TODO: [Varun] deduplicate
+	conds = append(conds, sqlf.Sprintf("scheme = %s", NPMPackagesScheme))
 
 	if filter.After > 0 {
 		conds = append(conds, sqlf.Sprintf("id > %d", filter.After))

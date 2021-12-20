@@ -11,6 +11,7 @@ import (
 
 	"github.com/sourcegraph/sourcegraph/enterprise/internal/codeintel/stores/dbstore"
 	"github.com/sourcegraph/sourcegraph/internal/actor"
+	dbstore2 "github.com/sourcegraph/sourcegraph/internal/codeintel/stores/dbstore"
 	"github.com/sourcegraph/sourcegraph/internal/database"
 	"github.com/sourcegraph/sourcegraph/internal/extsvc"
 	"github.com/sourcegraph/sourcegraph/internal/observation"
@@ -21,8 +22,8 @@ import (
 )
 
 var schemeToExternalService = map[string]string{
-	"semanticdb": extsvc.KindJVMPackages, // TODO: [Varun] deduplicate
-	"npm":        extsvc.KindNPMPackages, // TODO: [Varun] deduplicate
+	dbstore2.JVMPackagesScheme: extsvc.KindJVMPackages,
+	dbstore2.NPMPackagesScheme: extsvc.KindNPMPackages,
 }
 
 // NewDependencySyncScheduler returns a new worker instance that processes
