@@ -5,13 +5,15 @@ import React from 'react'
 
 import { getDocumentNode } from '@sourcegraph/shared/src/graphql/graphql'
 import { MockedTestProvider, waitForNextApolloResponse } from '@sourcegraph/shared/src/testing/apollo'
-
-import { SubmitHappinessFeedbackVariables, SubmitHappinessFeedbackResult } from '../../graphql-operations'
-import { routes } from '../../routes'
+import {
+    SubmitHappinessFeedbackResult,
+    SubmitHappinessFeedbackVariables,
+} from '@sourcegraph/web/src/graphql-operations'
+import { routes } from '@sourcegraph/web/src/routes'
 
 import { FeedbackPrompt, HAPPINESS_FEEDBACK_OPTIONS, SUBMIT_HAPPINESS_FEEDBACK_QUERY } from './FeedbackPrompt'
 
-jest.mock('../../hooks', () => ({
+jest.mock('@sourcegraph/web/src/hooks', () => ({
     useRoutesMatch: () => '/some-route',
 }))
 
