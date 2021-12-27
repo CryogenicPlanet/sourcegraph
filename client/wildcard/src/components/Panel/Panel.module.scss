@@ -1,0 +1,21 @@
+.panel {
+    position: fixed;
+    min-height: 6rem;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    overflow-x: hidden;
+
+    background-color: var(--color-bg-1);
+}
+
+.handle-resize {
+    --handle-size: 2px;
+
+    width: 100%;
+    cursor: ns-resize;
+
+    background-color: var(--border-color-2);
+    height: var(--handle-size);
+    margin-bottom: var(--handle-size);
+}
