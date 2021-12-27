@@ -1,0 +1,18 @@
+.loading-spinner {
+    margin: 0.125rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    animation: loading-spinner-spin 1s linear infinite;
+    border: 2px solid var(--loading-spinner-outer-color, rgba(0, 0, 0, 0.3));
+    border-top: 2px solid var(--loading-spinner-inner-color, rgba(0, 0, 0, 1));
+}
+
+@keyframes loading-spinner-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
