@@ -79,8 +79,7 @@ func getMode() configurationMode {
 var configurationServerFrontendOnlyInitialized = make(chan struct{})
 
 func initDefaultClient() *client {
-	clientStore := newStore()
-	defaultClient := &client{store: clientStore}
+	defaultClient := &client{store: defaultStore}
 
 	mode := getMode()
 
@@ -90,7 +89,7 @@ func initDefaultClient() *client {
 		close(configurationServerFrontendOnlyInitialized)
 
 		// Seed the client store with an empty configuration.
-		_, err := clientStore.MaybeUpdate(conftypes.RawUnified{
+		_, err := defaultClient.store.MaybeUpdate(conftypes.RawUnified{
 			Site:               "{}",
 			ServiceConnections: conftypes.ServiceConnections{},
 		})

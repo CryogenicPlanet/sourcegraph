@@ -28,6 +28,9 @@ type store struct {
 	once  sync.Once
 }
 
+// shared between client and server in a single process
+var defaultStore = newStore()
+
 // newStore returns a new configuration store.
 func newStore() *store {
 	return &store{
