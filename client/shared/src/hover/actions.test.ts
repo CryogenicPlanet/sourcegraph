@@ -8,6 +8,7 @@ import * as sourcegraph from 'sourcegraph'
 
 import { Position, Range } from '@sourcegraph/extension-api-classes'
 import { Location } from '@sourcegraph/extension-api-types'
+import { GraphQLResult, SuccessGraphQLResult } from '@sourcegraph/http-client'
 import { LOADER_DELAY, MaybeLoadingResult } from '@sourcegraph/shared/src/codeintellify'
 
 import { ActionItemAction } from '../actions/ActionItem'
@@ -17,7 +18,6 @@ import { WorkspaceRootWithMetadata } from '../api/extension/extensionHostApi'
 import { integrationTestContext } from '../api/integration-test/testHelpers'
 import { TextDocumentPositionParameters } from '../api/protocol'
 import { HoveredToken } from '../codeintellify/tokenPosition'
-import { GraphQLResult, SuccessGraphQLResult } from '../graphql/graphql'
 import { PlatformContext, URLToFileContext } from '../platform/context'
 import { resetAllMemoizationCaches } from '../util/memoizeObservable'
 import {

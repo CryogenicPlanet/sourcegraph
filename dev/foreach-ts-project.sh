@@ -17,6 +17,7 @@ DIRS=(
   client/browser
   client/build-config
   client/common
+  client/http-client
   client/wildcard
   client/extension-api
   client/eslint-plugin-sourcegraph

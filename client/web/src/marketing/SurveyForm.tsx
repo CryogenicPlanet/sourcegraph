@@ -2,9 +2,8 @@ import React, { useState } from 'react'
 import { useHistory } from 'react-router'
 
 import { Form } from '@sourcegraph/branded/src/components/Form'
+import { useMutation, gql } from '@sourcegraph/http-client'
 import { LoadingSpinner } from '@sourcegraph/react-loading-spinner'
-import { useMutation } from '@sourcegraph/shared/src/graphql/apollo'
-import { gql } from '@sourcegraph/shared/src/graphql/graphql'
 import { Button } from '@sourcegraph/wildcard'
 
 import { AuthenticatedUser } from '../auth'

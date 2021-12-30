@@ -18,8 +18,8 @@ import {
 } from 'rxjs/operators'
 import addDomainPermissionToggle from 'webext-domain-permission-toggle'
 
+import { GraphQLResult, requestGraphQLCommon } from '@sourcegraph/http-client'
 import { createExtensionHostWorker } from '@sourcegraph/shared/src/api/extension/worker'
-import { GraphQLResult, requestGraphQLCommon } from '@sourcegraph/shared/src/graphql/graphql'
 import { EndpointPair } from '@sourcegraph/shared/src/platform/context'
 import { fetchCache } from '@sourcegraph/shared/src/util/fetchCache'
 import { isDefined } from '@sourcegraph/shared/src/util/types'

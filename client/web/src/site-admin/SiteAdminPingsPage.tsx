@@ -4,8 +4,8 @@ import React, { useEffect, useMemo } from 'react'
 import { RouteComponentProps } from 'react-router-dom'
 import { fromFetch } from 'rxjs/fetch'
 
+import { checkOk } from '@sourcegraph/http-client'
 import { LoadingSpinner } from '@sourcegraph/react-loading-spinner'
-import { checkOk } from '@sourcegraph/shared/src/backend/fetch'
 import { ThemeProps } from '@sourcegraph/shared/src/theme'
 import { useObservable } from '@sourcegraph/shared/src/util/useObservable'
 

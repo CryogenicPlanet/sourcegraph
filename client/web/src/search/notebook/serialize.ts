@@ -1,4 +1,4 @@
-import { IHighlightLineRange } from '@sourcegraph/shared/src/graphql/schema'
+import { IHighlightLineRange } from '@sourcegraph/shared/src/schema'
 import { toAbsoluteBlobURL } from '@sourcegraph/shared/src/util/url'
 
 import { parseBrowserRepoURL } from '../../util/url'

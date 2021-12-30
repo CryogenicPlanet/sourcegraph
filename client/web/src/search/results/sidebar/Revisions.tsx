@@ -2,9 +2,8 @@ import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@reach/tabs'
 import classNames from 'classnames'
 import React from 'react'
 
+import { dataOrThrowErrors, gql } from '@sourcegraph/http-client'
 import { LoadingSpinner } from '@sourcegraph/react-loading-spinner'
-import { dataOrThrowErrors, gql } from '@sourcegraph/shared/src/graphql/graphql'
-import { GitRefType } from '@sourcegraph/shared/src/graphql/schema'
 import { FilterType } from '@sourcegraph/shared/src/search/query/filters'
 
 import { useConnection } from '../../../components/FilteredConnection/hooks/useConnection'
@@ -13,6 +12,7 @@ import {
     SearchSidebarGitRefsResult,
     SearchSidebarGitRefsVariables,
     SearchSidebarGitRefFields,
+    GitRefType,
 } from '../../../graphql-operations'
 import { useTemporarySetting } from '../../../settings/temporary/useTemporarySetting'
 import { QueryUpdate } from '../../../stores/navbarSearchQueryState'

@@ -2,7 +2,7 @@ import { MockedResponse } from '@apollo/client/testing'
 import { storiesOf } from '@storybook/react'
 import React from 'react'
 
-import { getDocumentNode } from '@sourcegraph/shared/src/graphql/graphql'
+import { getDocumentNode } from '@sourcegraph/http-client'
 
 import { WebStory } from '../../components/WebStory'
 import { SubmitHappinessFeedbackResult } from '../../graphql-operations'

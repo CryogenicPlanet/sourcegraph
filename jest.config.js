@@ -14,5 +14,6 @@ module.exports = {
     'client/web/jest.config.js',
     'client/wildcard/jest.config.js',
     'client/storybook/jest.config.js',
+    'client/http-client/jest.config.js',
   ],
 }

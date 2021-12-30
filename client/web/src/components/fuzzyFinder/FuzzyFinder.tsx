@@ -1,7 +1,7 @@
 import { ApolloError, useQuery } from '@apollo/client'
 import React, { useState, useEffect, Dispatch, SetStateAction } from 'react'
 
-import { gql, getDocumentNode } from '@sourcegraph/shared/src/graphql/graphql'
+import { gql, getDocumentNode } from '@sourcegraph/http-client'
 import { TelemetryProps } from '@sourcegraph/shared/src/telemetry/telemetryService'
 
 import { FuzzySearch, SearchIndexing } from '../../fuzzyFinder/FuzzySearch'

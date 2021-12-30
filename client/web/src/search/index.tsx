@@ -3,7 +3,7 @@ import { Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
 
 import { SearchPatternType } from '@sourcegraph/shared/src/graphql-operations'
-import { ISavedSearch } from '@sourcegraph/shared/src/graphql/schema'
+import { ISavedSearch } from '@sourcegraph/shared/src/schema'
 import { discreteValueAliases, escapeSpaces, FilterType } from '@sourcegraph/shared/src/search/query/filters'
 import { Filter } from '@sourcegraph/shared/src/search/query/token'
 import { findFilter, FilterKind } from '@sourcegraph/shared/src/search/query/validate'
