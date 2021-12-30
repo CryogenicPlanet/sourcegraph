@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Button link renders correctly 1`] = `
+<DocumentFragment>
+  <a
+    class="anchorLink nav-link"
+    href="http://example.com"
+    tabindex="0"
+  >
+    Button link
+  </a>
+</DocumentFragment>
+`;
