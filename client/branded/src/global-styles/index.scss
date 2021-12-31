@@ -110,7 +110,6 @@ $spacer: 1rem;
 
 // Modified in `./buttons.scss`
 @import 'bootstrap/scss/buttons';
-@import 'bootstrap/scss/button-group';
 
 // Modified in `./forms.scss`
 @import 'bootstrap/scss/forms';
@@ -134,6 +133,7 @@ $spacer: 1rem;
 @import './tables';
 @import './code';
 @import './buttons';
+@import './button-group';
 @import './alert';
 @import './forms';
 @import './highlight';
