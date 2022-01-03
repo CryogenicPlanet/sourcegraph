@@ -3,6 +3,7 @@ import React from 'react'
 
 import { ForwardReferenceComponent } from '../../types'
 
+import styles from './Button.module.scss'
 import { BUTTON_VARIANTS, BUTTON_SIZES } from './constants'
 import { getButtonSize, getButtonStyle } from './utils'
 
@@ -54,7 +55,7 @@ export const Button = React.forwardRef(
         <Component
             ref={reference}
             className={classNames(
-                'btn',
+                styles.btn,
                 variant && getButtonStyle({ variant, outline }),
                 size && getButtonSize({ size }),
                 className

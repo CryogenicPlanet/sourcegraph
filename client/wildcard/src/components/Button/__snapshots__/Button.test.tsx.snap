@@ -2,7 +2,7 @@
 
 exports[`Button Renders size 'lg' correctly 1`] = `
 <button
-  class="btn btn-lg"
+  class="btn btnLg"
   type="button"
 >
   Hello world
@@ -11,7 +11,7 @@ exports[`Button Renders size 'lg' correctly 1`] = `
 
 exports[`Button Renders size 'sm' correctly 1`] = `
 <button
-  class="btn btn-sm"
+  class="btn btnSm"
   type="button"
 >
   Hello world
@@ -20,7 +20,7 @@ exports[`Button Renders size 'sm' correctly 1`] = `
 
 exports[`Button Renders variant 'danger' correctly 1`] = `
 <button
-  class="btn btn-danger"
+  class="btn btnDanger"
   type="button"
 >
   Hello world
@@ -29,7 +29,7 @@ exports[`Button Renders variant 'danger' correctly 1`] = `
 
 exports[`Button Renders variant 'info' correctly 1`] = `
 <button
-  class="btn btn-info"
+  class="btn btnInfo"
   type="button"
 >
   Hello world
@@ -47,7 +47,7 @@ exports[`Button Renders variant 'link' correctly 1`] = `
 
 exports[`Button Renders variant 'merged' correctly 1`] = `
 <button
-  class="btn btn-merged"
+  class="btn btnMerged"
   type="button"
 >
   Hello world
@@ -56,7 +56,7 @@ exports[`Button Renders variant 'merged' correctly 1`] = `
 
 exports[`Button Renders variant 'primary' correctly 1`] = `
 <button
-  class="btn btn-primary"
+  class="btn btnPrimary"
   type="button"
 >
   Hello world
@@ -65,7 +65,7 @@ exports[`Button Renders variant 'primary' correctly 1`] = `
 
 exports[`Button Renders variant 'secondary' correctly 1`] = `
 <button
-  class="btn btn-secondary"
+  class="btn btnSecondary"
   type="button"
 >
   Hello world
@@ -74,7 +74,7 @@ exports[`Button Renders variant 'secondary' correctly 1`] = `
 
 exports[`Button Renders variant 'success' correctly 1`] = `
 <button
-  class="btn btn-success"
+  class="btn btnSuccess"
   type="button"
 >
   Hello world
@@ -83,7 +83,7 @@ exports[`Button Renders variant 'success' correctly 1`] = `
 
 exports[`Button Renders variant 'warning' correctly 1`] = `
 <button
-  class="btn btn-warning"
+  class="btn btnWarning"
   type="button"
 >
   Hello world
