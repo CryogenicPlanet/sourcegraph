@@ -1,13 +1,15 @@
 import { Meta, Story } from '@storybook/react'
+import classnames from 'classnames'
 import React from 'react'
 
 import { BrandedStory } from '@sourcegraph/branded/src/components/BrandedStory'
 import { Toggle } from '@sourcegraph/branded/src/components/Toggle'
 import webStyles from '@sourcegraph/web/src/SourcegraphWebApp.scss'
 
-import { Button, Grid } from '..'
+import { Card, CardBody, CardHeader, CardSubtitle, CardText, CardTitle } from '..'
+import { Button, Grid } from '../..'
 
-import { Card, CardBody, CardHeader, CardSubtitle, CardText, CardTitle } from '.'
+import styles from './CardStory.module.scss'
 
 const config: Meta = {
     title: 'wildcard/Card',
@@ -76,7 +78,12 @@ const cardItem = (
                 <CardSubtitle>New search result → Sends email notifications, delivers webhook</CardSubtitle>
             </div>
             <div className="d-flex align-items-center">
-                <Toggle onClick={() => {}} value={true} className="mr-3" disabled={false} />
+                <Toggle
+                    onClick={() => {}}
+                    value={true}
+                    className={classnames('mr-3 align-item-baseline', styles.toggle)}
+                    disabled={false}
+                />
                 <Button variant="link">Edit</Button>
             </div>
         </CardBody>
