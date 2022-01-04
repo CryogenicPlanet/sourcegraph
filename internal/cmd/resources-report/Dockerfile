@@ -1,4 +1,4 @@
-FROM golang:1.16-alpine AS builder
+FROM golang:1.16-alpine@sha256:41610aabe4ee677934b08685f7ffbeaa89166ed30df9da3f569d1e63789e1992 AS builder
 
 WORKDIR /go/src/resources-report
 
